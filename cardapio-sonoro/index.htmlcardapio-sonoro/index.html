@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cardápio Sonoro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF6EE;
+    --surface:#FFFFFF;
+    --surface-2:#F3EBDC;
+    --text:#2A2018;
+    --muted:#7C6C58;
+    --border:#E8DCC8;
+    --accent:#D97A2E;
+    --accent-ink:#FFFFFF;
+    --accent-2:#1F6F6B;
+    --shadow: 0 8px 24px -12px rgba(42,32,24,.25);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1B1712;
+      --surface:#241E17;
+      --surface-2:#2C241B;
+      --text:#F3EADC;
+      --muted:#B9A88E;
+      --border:#3B3226;
+      --accent:#F0954B;
+      --accent-ink:#241E17;
+      --accent-2:#57BDB6;
+      --shadow: 0 8px 28px -12px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B1712;
+    --surface:#241E17;
+    --surface-2:#2C241B;
+    --text:#F3EADC;
+    --muted:#B9A88E;
+    --border:#3B3226;
+    --accent:#F0954B;
+    --accent-ink:#241E17;
+    --accent-2:#57BDB6;
+    --shadow: 0 8px 28px -12px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Work Sans", -apple-system, "Segoe UI", sans-serif;
+    padding-inline:16px;
+    padding-block:0;
+    max-width:640px;
+    margin:0 auto;
+  }
+  h1,h2,h3{
+    font-family:"Fraunces", Georgia, serif;
+    text-wrap:balance;
+    margin:0;
+  }
+  .tabular{ font-variant-numeric: tabular-nums; }
+
+  a{color:var(--accent-2);}
+
+  /* ---------- topo fixo ---------- */
+  .topbar{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:var(--bg);
+    padding-top:calc(env(safe-area-inset-top, 0px) + 14px);
+    padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+    margin-inline:-16px;
+    padding-inline:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .brand-name{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--accent);
+    letter-spacing:.2px;
+  }
+  .brand-sub{
+    font-size:.72rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+  }
+
+  .player{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:10px 14px;
+    box-shadow:var(--shadow);
+  }
+  .play-btn{
+    flex:0 0 auto;
+    width:52px;height:52px;
+    border-radius:50%;
+    border:none;
+    background:var(--accent);
+    color:var(--accent-ink);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:1.4rem;
+    transition:transform .12s ease;
+  }
+  .play-btn:active{ transform:scale(.93); }
+  .play-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .player-text{ flex:1 1 auto; min-width:0; }
+  .player-title{ font-weight:600; font-size:.95rem; }
+  .player-status{ font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .stop-btn{
+    flex:0 0 auto;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--muted);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:.78rem;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .stop-btn:focus-visible{ outline:2px solid var(--accent-2); }
+  .stop-btn[hidden]{ display:none; }
+
+  .nav-chips{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-top:12px;
+    margin-inline:-16px;
+    padding-inline:16px;
+    scrollbar-width:none;
+  }
+  .nav-chips::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto;
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--text);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:6px 13px;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+
+  /* ---------- conteúdo ---------- */
+  .hero{
+    padding-block:18px 6px;
+  }
+  .hero p{
+    color:var(--muted);
+    font-size:.92rem;
+    max-width:52ch;
+    margin:6px 0 0;
+  }
+
+  .hours{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 16px;
+    font-size:.85rem;
+    color:var(--muted);
+    margin-top:10px;
+  }
+
+  section.menu-section{
+    margin-top:26px;
+    scroll-margin-top:150px;
+    border-radius:18px;
+    transition:background .3s ease, box-shadow .3s ease;
+  }
+  section.menu-section.speaking{
+    background:var(--surface-2);
+    box-shadow:var(--shadow);
+    padding:14px;
+    margin-inline:-14px;
+  }
+
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    border-bottom:2px solid var(--accent);
+    padding-bottom:6px;
+    margin-bottom:4px;
+  }
+  .section-head h2{
+    font-size:1.15rem;
+    color:var(--text);
+  }
+  .listen-sec{
+    flex:0 0 auto;
+    border:none;
+    background:none;
+    color:var(--accent-2);
+    font-size:1.05rem;
+    cursor:pointer;
+    padding:4px 6px;
+    border-radius:8px;
+  }
+  .listen-sec:focus-visible{ outline:2px solid var(--accent-2); }
+
+  .obs{
+    font-size:.85rem;
+    color:var(--muted);
+    font-style:italic;
+    margin:8px 0;
+  }
+
+  .item{
+    display:flex;
+    gap:12px;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-block:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .item:last-child{ border-bottom:none; }
+  .item-name{
+    font-weight:600;
+    font-size:.98rem;
+  }
+  .item-desc{
+    font-size:.83rem;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .item-price{
+    flex:0 0 auto;
+    font-weight:700;
+    color:var(--accent);
+    white-space:nowrap;
+    font-size:.95rem;
+  }
+  .item-price small{
+    display:block;
+    font-weight:500;
+    color:var(--muted);
+    font-size:.68rem;
+    text-align:right;
+  }
+
+  .plain-note p{
+    font-size:.88rem;
+    color:var(--muted);
+    margin:6px 0;
+  }
+
+  footer{
+    margin-top:34px;
+    padding-block:24px calc(28px + env(safe-area-inset-bottom, 0px));
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    font-size:.8rem;
+    text-align:center;
+  }
+  footer .heart{ color:var(--accent); }
+
+  .sr-only{
+    position:absolute; width:1px;height:1px; padding:0;margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    section.menu-section{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <span class="brand-name">Casa da Peixada</span>
+    <span class="brand-sub">Cardápio sonoro</span>
+  </div>
+  <div class="player">
+    <button class="play-btn" id="playBtn" aria-label="Ouvir cardápio">▶</button>
+    <div class="player-text">
+      <div class="player-title" id="playerTitle">Ouvir cardápio</div>
+      <div class="player-status" id="playerStatus">Toque para começar a leitura em voz alta</div>
+    </div>
+    <button class="stop-btn" id="stopBtn" hidden>Parar</button>
+  </div>
+  <nav class="nav-chips" id="navChips" aria-label="Ir para seção"></nav>
+</div>
+
+<main>
+  <div class="hero">
+    <h1>Cardápio acessível</h1>
+    <p>Toque no botão acima para ouvir o cardápio completo em voz alta, ou role a página para ler. Este mesmo cardápio também está disponível em braille.</p>
+    <div class="hours" id="hours"></div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="plain-note">
+    <p id="rulesText"></p>
+    <p id="infoText"></p>
+  </div>
+
+  <footer>
+    Casa da Peixada · São Luís, Maranhão · desde 1972<br>
+    Página acessível criada para leitura em voz e consulta digital <span class="heart">♦</span>
+  </footer>
+</main>
+
+<script id="menu-json" type="application/json">{"header": {"nome": "CASA DA PEIXADA", "local": "SÃO LUÍS - MARANHÃO - DESDE 1972", "horario": ["Segunda a sábado: das 10h às 23h", "Domingo: das 10h às 22h"]}, "sections": [{"titulo": "ENTRADAS", "itens": [{"nome": "Pastel mix", "preco": "46", "desc": "9 unidades sendo carne, queijo e camarão, servidos com geleia de pimenta"}, {"nome": "Filé ao gorgonzola", "preco": "72", "desc": "Filé de carne ao gorgonzola servido com torradas"}, {"nome": "Filé trinchado com fritas", "preco": "78", "desc": "Filé mignon, batatas fritas, farofa e vinagrete"}, {"nome": "Carne de sol tira gosto", "preco": "72", "desc": "Carne de sol, batatas fritas, farofa e vinagrete"}, {"nome": "Tripinha", "preco": "58", "desc": "Tripinha frita, acompanha farofa e vinagrete"}, {"nome": "Torresmo", "preco": "59", "desc": "Torresmo frito, acompanha farofa e vinagrete"}, {"nome": "Batata frita", "preco": "35", "desc": "Batatas fritas, acompanha molho rosé"}, {"nome": "Rolinho de camarão", "preco": "52", "desc": "6 unidades, acompanha molho rosé"}, {"nome": "Rolinho de queijo", "preco": "42", "desc": "6 unidades, acompanha molho rosé"}, {"nome": "Bolinho de bacalhau", "preco": "66", "desc": "10 unidades de bolinho de bacalhau, servido com molho tártaro"}, {"nome": "Trio do mar", "preco": "78", "desc": "6 unidades de camarão à milanesa, 6 de isca de peixe e 6 de patinha de caranguejo, servido com molho tártaro"}, {"nome": "Caranguejo toc toc", "preco": "76", "desc": "5 unidades, acompanha meia porção de arroz de toucinho, farofa e vinagrete"}, {"nome": "Casquinha de caranguejo", "preco": "35", "desc": "Acompanha farofa"}, {"nome": "Patinha à milanesa", "preco": "72", "desc": "12 unidades de patinhas de caranguejo empanadas, servido com molho tártaro"}, {"nome": "Pescada frita", "preco": "88", "desc": "400g de pescada, farofa e vinagrete"}, {"nome": "Camarão alho e óleo", "preco": "73", "desc": "400g de camarão, acompanha farofa e vinagrete"}, {"nome": "Camarão à milanesa", "preco": "79", "desc": "8 unidades de camarão empanado, acompanha molho tártaro"}, {"nome": "Isca de peixe", "preco": "89", "desc": "Filé de pescada empanado, servido com molho tártaro"}]}, {"titulo": "CERVEJAS", "itens": [{"nome": "Heineken", "preco": "22"}, {"nome": "Stella Artois", "preco": "20"}, {"nome": "Spaten", "preco": "18"}, {"nome": "Antarctica Original", "preco": "17"}, {"nome": "Brahma Duplo Malte", "preco": "16"}, {"nome": "Amstel", "preco": "16"}, {"nome": "Skol", "preco": "14"}, {"nome": "Brahma Chopp", "preco": "14"}, {"nome": "Long neck (Stella ou Corona)", "preco": "13"}]}, {"titulo": "OUTRAS BEBIDAS", "itens": [{"nome": "Suco copo (275ml)", "preco": "12"}, {"nome": "Jarra de suco (750ml)", "preco": "24"}, {"nome": "Água de coco", "preco": "8"}, {"nome": "Água de coco jarra (750ml)", "preco": "20"}, {"nome": "Refrigerante KS", "preco": "8"}, {"nome": "Refrigerante lata", "preco": "9"}, {"nome": "Água mineral", "preco": "6"}, {"nome": "Água mineral com gás", "preco": "7"}, {"nome": "H2O limão ou limoneto", "preco": "12"}, {"nome": "Energético", "preco": "18"}]}, {"titulo": "EXTRAS", "itens": [{"nome": "Arroz de toucinho", "preco": "25"}, {"nome": "Arroz de cuxá", "preco": "22"}, {"nome": "Arroz baião de dois", "preco": "22"}, {"nome": "Arroz branco", "preco": "15"}, {"nome": "Pirão", "preco": "10"}, {"nome": "Caranguejo (unidade)", "preco": "14"}, {"nome": "Caldo de peixe", "preco": "35"}, {"nome": "Caldo de camarão", "preco": "40"}, {"nome": "Farofa", "preco": "2"}, {"nome": "Vinagrete", "preco": "2"}, {"nome": "Purê de batata", "preco": "15"}, {"nome": "Vatapá", "preco": "20"}, {"nome": "Banana à milanesa", "preco": "10"}]}, {"titulo": "DELÍCIAS DA CASA - DO MAR (serve 2 / serve 4)", "itens": [{"nome": "Filé de peixe ao molho de camarão", "preco2": "179", "preco4": "302", "desc": "Filé de peixe, filé de camarão, arroz branco, farofa e pirão"}, {"nome": "Filé de peixe à delícia", "preco2": "179", "preco4": "312", "desc": "Filé de peixe, molho branco, queijo e banana, arroz branco e farofa"}, {"nome": "Filé de pescada à milanesa", "preco2": "175", "preco4": "289", "desc": "Filé de peixe, arroz de toucinho, vatapá, farofa e vinagrete"}, {"nome": "Peixada maranhense", "preco2": "179", "preco4": "302", "desc": "Pescada cozida no leite de coco, arroz branco, ovos, batata, farofa e pirão"}, {"nome": "Peixada mista", "preco2": "188", "preco4": "322", "desc": "Pescada cozida no leite de coco, camarão, arroz branco, ovos, batata, farofa e pirão"}, {"nome": "Peixada Maria Adélia", "preco2": "179", "preco4": null, "desc": "Pescada cozida no leite de vaca, arroz branco, ovos, batata, farofa e pirão"}, {"nome": "Pescada frita", "preco2": "157", "preco4": "246", "desc": "Pescada, arroz de cuxá, vatapá, farofa e vinagrete"}, {"nome": "Peixe escabeche", "preco2": "159", "preco4": "252", "desc": "Pescada com leite de coco, arroz branco e farofa"}, {"nome": "Peixe à moda da casa", "preco2": "176", "preco4": "312", "desc": "Pescada frita, camarão frito, arroz de cuxá, vatapá, farofa e vinagrete"}, {"nome": "Arroz do mar", "preco2": "172", "preco4": "292", "desc": "Arroz servido com lula, mexilhão, camarão, polvo e cubos de filé de peixe"}, {"nome": "Arroz à moda do chef", "preco2": null, "preco4": "315", "desc": "Arroz cremoso com filé de camarão, presunto e ervilha, cubos de filé de pescada e camarão à milanesa, queijo parmesão e batata palha"}, {"nome": "Camaroada maranhense", "preco2": "166", "preco4": "292", "desc": "Camarão, arroz branco, ovos, batata, farofa e pirão"}, {"nome": "Camarão à milanesa", "preco2": "169", "preco4": "299", "desc": "Camarão empanado, arroz branco, farofa e vinagrete"}, {"nome": "Camarão alho e óleo", "preco2": "169", "preco4": "292", "desc": "Camarão, arroz branco, vatapá, farofa e vinagrete"}, {"nome": "Caranguejada", "preco2": "113", "preco4": "189", "desc": "6 unidades de caranguejo, arroz de toucinho, ovos, batata, pirão, farofa e vinagrete"}, {"nome": "Caranguejada sem cabeça", "preco2": "120", "preco4": "199", "desc": "6 unidades de caranguejo, arroz de toucinho, ovos, batata, pirão, farofa e vinagrete"}, {"nome": "Peixe pedra escabeche", "preco2": "143", "preco4": null, "desc": "Peixe pedra, arroz de cuxá, farofa e vinagrete"}]}, {"titulo": "CARNES", "itens": [{"nome": "Filé a cavalo", "preco": "166", "desc": "Filé mignon grelhado, ovos fritos, batata frita, baião de dois, farofa e vinagrete"}, {"nome": "Carne de sol de filé", "preco": "172", "desc": "Carne de sol de filé, batatas fritas, arroz baião de dois, queijo mussarela, banana à milanesa, farofa e vinagrete"}, {"nome": "Carne de sol de picanha", "preco": "182", "desc": "Carne de sol de picanha, batata frita, arroz baião de dois, banana à milanesa, farofa e vinagrete"}]}, {"titulo": "PRATO KIDS", "itens": [{"nome": "Peito de frango", "preco": "42", "desc": "Arroz, batata frita e farofa"}, {"nome": "Alcatra em tiras", "preco": "46", "desc": "Arroz, batata frita e farofa"}]}, {"titulo": "SALADAS", "obs": "Alface americana, tomate cereja, cebola roxa, molho de mostarda e mel, e queijo parmesão.", "itens": [{"nome": "Peito de frango", "preco": "39"}, {"nome": "Alcatra em tiras", "preco": "42"}, {"nome": "Camarão", "preco": "45"}]}, {"titulo": "SOBREMESA", "itens": [{"nome": "Pudim", "preco": "20"}, {"nome": "Petit gateau", "preco": "28"}]}, {"titulo": "REGRAS DA CASA", "texto": ["Para garantir a qualidade da experiência de nossos pratos, não é permitido o consumo de alimentos e bebidas externos.", "Consulte nossa equipe para necessidades especiais.", "Cobramos taxa de rolha (consulte antes os valores)."]}, {"titulo": "INFORMAÇÕES", "texto": ["Pagamento em cartões ou pix.", "Taxa de serviço opcional.", "Siga a Casa da Peixada no Instagram e compartilhe sua foto."]}]}
+</script>
+<script>
+(function(){
+  "use strict";
+  var DATA = JSON.parse(document.getElementById('menu-json').textContent);
+  var sectionsEl = document.getElementById('sections');
+  var navChips = document.getElementById('navChips');
+  var hoursEl = document.getElementById('hours');
+
+  function priceLabel(it){
+    if (it.preco) return { main: 'R$ ' + it.preco, sub: '' };
+    if (it.preco2 || it.preco4){
+      var parts = [];
+      if (it.preco2) parts.push('serve 2: R$ ' + it.preco2);
+      if (it.preco4) parts.push('serve 4: R$ ' + it.preco4);
+      return { main: parts[0] || '', sub: parts.length>1 ? parts[1] : '' };
+    }
+    return null;
+  }
+
+  // -------- monta o cabeçalho de horários --------
+  (DATA.header.horario||[]).forEach(function(h){
+    var span = document.createElement('span');
+    span.textContent = h;
+    hoursEl.appendChild(span);
+  });
+
+  // -------- monta as seções --------
+  DATA.sections.forEach(function(sec, idx){
+    if (sec.texto){ return; } // seções só-texto (regras/infos) tratadas à parte
+    var id = 'sec-' + idx;
+    var section = document.createElement('section');
+    section.className = 'menu-section';
+    section.id = id;
+
+    var head = document.createElement('div');
+    head.className = 'section-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = sec.titulo;
+    var listenBtn = document.createElement('button');
+    listenBtn.className = 'listen-sec';
+    listenBtn.setAttribute('aria-label', 'Ouvir seção ' + sec.titulo);
+    listenBtn.textContent = '🔊';
+    listenBtn.addEventListener('click', function(){ speakSection(idx); });
+    head.appendChild(h2);
+    head.appendChild(listenBtn);
+    section.appendChild(head);
+
+    if (sec.obs){
+      var obs = document.createElement('p');
+      obs.className = 'obs';
+      obs.textContent = sec.obs;
+      section.appendChild(obs);
+    }
+
+    (sec.itens||[]).forEach(function(it){
+      var row = document.createElement('div');
+      row.className = 'item';
+      var left = document.createElement('div');
+      var name = document.createElement('div');
+      name.className = 'item-name';
+      name.textContent = it.nome;
+      left.appendChild(name);
+      if (it.desc){
+        var desc = document.createElement('div');
+        desc.className = 'item-desc';
+        desc.textContent = it.desc;
+        left.appendChild(desc);
+      }
+      row.appendChild(left);
+
+      var pl = priceLabel(it);
+      if (pl){
+        var price = document.createElement('div');
+        price.className = 'item-price tabular';
+        price.textContent = pl.main;
+        if (pl.sub){
+          var small = document.createElement('small');
+          small.textContent = pl.sub;
+          price.appendChild(small);
+        }
+        row.appendChild(price);
+      }
+      section.appendChild(row);
+    });
+
+    sectionsEl.appendChild(section);
+
+    var chip = document.createElement('a');
+    chip.className = 'chip';
+    chip.href = '#' + id;
+    chip.textContent = sec.titulo.split(' - ')[0].split(' (')[0];
+    navChips.appendChild(chip);
+  });
+
+  // -------- textos só-texto (regras da casa / informações) --------
+  var rules = DATA.sections.find(function(s){ return s.titulo === 'REGRAS DA CASA'; });
+  var infos = DATA.sections.find(function(s){ return s.titulo === 'INFORMAÇÕES'; });
+  if (rules) document.getElementById('rulesText').textContent = rules.texto.join(' ');
+  if (infos) document.getElementById('infoText').textContent = infos.texto.join(' ');
+
+  // ==================== leitura por voz ====================
+  var synth = window.speechSynthesis;
+  var playBtn = document.getElementById('playBtn');
+  var stopBtn = document.getElementById('stopBtn');
+  var playerTitle = document.getElementById('playerTitle');
+  var playerStatus = document.getElementById('playerStatus');
+  var supported = !!synth;
+  var ptVoice = null;
+  var queue = [];       // [{idx, text}]
+  var speaking = false;
+  var paused = false;
+
+  if (!supported){
+    playerStatus.textContent = 'Leitura por voz não é suportada neste navegador';
+    playBtn.disabled = true;
+  }
+
+  function pickVoice(){
+    if (!supported) return;
+    var voices = synth.getVoices() || [];
+    ptVoice = voices.find(function(v){ return /pt[-_]BR/i.test(v.lang); }) ||
+              voices.find(function(v){ return /^pt/i.test(v.lang); }) ||
+              null;
+  }
+  if (supported){
+    pickVoice();
+    synth.onvoiceschanged = pickVoice;
+  }
+
+  function textForSection(sec){
+    var parts = [sec.titulo + '.'];
+    if (sec.obs) parts.push(sec.obs + '.');
+    if (sec.texto) parts.push(sec.texto.join('. '));
+    (sec.itens||[]).forEach(function(it){
+      var p = it.nome;
+      var pl = priceLabel(it);
+      if (pl) p += ', ' + pl.main.replace('R$', 'reais') + (pl.sub ? ' e ' + pl.sub.replace('R$', 'reais') : '');
+      if (it.desc) p += '. ' + it.desc;
+      parts.push(p + '.');
+    });
+    return parts.join(' ');
+  }
+
+  function buildQueue(){
+    queue = [];
+    queue.push({ idx: -1, text: DATA.header.nome + '. ' + DATA.header.local + '. Horário: ' + DATA.header.horario.join('. ') + '.' });
+    DATA.sections.forEach(function(sec, idx){
+      queue.push({ idx: idx, text: textForSection(sec) });
+    });
+  }
+
+  function clearHighlight(){
+    document.querySelectorAll('.menu-section.speaking').forEach(function(el){
+      el.classList.remove('speaking');
+    });
+  }
+
+  function highlight(idx){
+    clearHighlight();
+    if (idx == null || idx < 0) return;
+    var el = document.getElementById('sec-' + idx);
+    if (el){
+      el.classList.add('speaking');
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+
+  function setPlayingUI(isPlaying, label){
+    playBtn.textContent = isPlaying ? '❚❚' : '▶';
+    playBtn.setAttribute('aria-label', isPlaying ? 'Pausar' : 'Ouvir cardápio');
+    playerTitle.textContent = label || (isPlaying ? 'Lendo cardápio…' : 'Ouvir cardápio');
+    stopBtn.hidden = !isPlaying && !paused;
+  }
+
+  function speakQueueFrom(startIndex){
+    if (!supported) return;
+    synth.cancel();
+    var items = queue.slice(startIndex);
+    speaking = true; paused = false;
+    setPlayingUI(true);
+    playerStatus.textContent = 'Preparando áudio…';
+
+    items.forEach(function(entry){
+      var utt = new SpeechSynthesisUtterance(entry.text);
+      utt.lang = 'pt-BR';
+      if (ptVoice) utt.voice = ptVoice;
+      utt.rate = 0.98;
+      utt.onstart = function(){
+        highlight(entry.idx);
+        playerStatus.textContent = entry.idx === -1 ? 'Introdução' : DATA.sections[entry.idx].titulo;
+      };
+      utt.onend = function(){
+        if (entry === items[items.length-1]){
+          speaking = false;
+          clearHighlight();
+          setPlayingUI(false, 'Ouvir cardápio');
+          playerStatus.textContent = 'Toque para começar a leitura em voz alta';
+        }
+      };
+      utt.onerror = function(){ /* segue para o próximo item da fila */ };
+      synth.speak(utt);
+    });
+  }
+
+  playBtn.addEventListener('click', function(){
+    if (!supported) return;
+    if (speaking && !paused){
+      synth.pause();
+      paused = true;
+      setPlayingUI(false, 'Pausado');
+      playBtn.textContent = '▶';
+      stopBtn.hidden = false;
+      return;
+    }
+    if (paused){
+      synth.resume();
+      paused = false;
+      setPlayingUI(true);
+      return;
+    }
+    buildQueue();
+    speakQueueFrom(0);
+  });
+
+  stopBtn.addEventListener('click', function(){
+    if (!supported) return;
+    synth.cancel();
+    speaking = false; paused = false;
+    clearHighlight();
+    setPlayingUI(false, 'Ouvir cardápio');
+    playerStatus.textContent = 'Toque para começar a leitura em voz alta';
+  });
+
+  function speakSection(idx){
+    if (!supported) return;
+    buildQueue();
+    var start = queue.findIndex(function(q){ return q.idx === idx; });
+    if (start >= 0) speakQueueFrom(start);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden && supported) synth.cancel();
+  });
+})();
+</script>
+
+</body>
+</html>
+
